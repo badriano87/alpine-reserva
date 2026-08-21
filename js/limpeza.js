@@ -1,7 +1,7 @@
 // Tela da Liliane: registrar o status de cada produto durante a limpeza.
 
-const STATUS_OPCOES = ['Ok', 'Repus agora', 'Precisa repor', 'Faltando ou danificado'];
-const STATUS_PADRAO = 'Ok';
+const STATUS_OPCOES = ['Repus agora', 'Não necessitou reposição', 'Está em falta no estoque', 'Danificado'];
+const STATUS_PADRAO = 'Não necessitou reposição';
 
 let cabanas = [];
 let produtos = [];
@@ -153,7 +153,7 @@ async function salvarLimpeza() {
       throw new Error((resultado && resultado.erro) || 'Não foi possível salvar.');
     }
 
-    const pendentes = itens.filter(i => i.status !== 'Ok').length;
+    const pendentes = itens.filter(i => i.status !== STATUS_PADRAO).length;
     document.getElementById('resumoConfirmacao').textContent =
       pendentes === 0
         ? 'Tudo certo por aqui — nenhum item pendente.'
