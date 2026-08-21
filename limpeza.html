@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alpine Reserva — Registrar limpeza</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="topo">
+  <div>
+    <h1 id="tituloTopo">Registrar limpeza</h1>
+    <div class="subtitulo" id="subtituloTopo">Escolha a cabana</div>
+  </div>
+  <a class="link-topo" href="index.html">Sair</a>
+</header>
+
+<main>
+
+  <div id="areaCarregando" class="aviso-carregando">Carregando produtos...</div>
+  <div id="areaErro"></div>
+
+  <div id="areaCabanas" class="cartao" style="display:none;">
+    <h2>Qual cabana você está limpando?</h2>
+    <div class="grade-cabanas" id="gradeCabanas"></div>
+  </div>
+
+  <div id="areaChecklist" style="display:none;">
+    <div id="listaAmbientes"></div>
+  </div>
+
+  <div id="areaConfirmacao" class="tela-confirmacao" style="display:none;">
+    <div class="icone">✅</div>
+    <h2>Limpeza registrada com sucesso!</h2>
+    <p id="resumoConfirmacao"></p>
+    <br />
+    <button class="botao botao-primario" id="botaoNovaLimpeza">Registrar outra limpeza</button>
+  </div>
+
+</main>
+
+<div class="barra-salvar" id="barraSalvar" style="display:none;">
+  <button class="botao botao-primario" id="botaoSalvar">💾 Salvar limpeza</button>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/login.js"></script>
+<script src="js/limpeza.js"></script>
+
+</body>
+</html>
