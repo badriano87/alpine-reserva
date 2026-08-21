@@ -158,7 +158,7 @@ async function carregarHistorico() {
 
   let html = '';
   resultado.historico.forEach((sessao, indice) => {
-    const pendentes = sessao.itens.filter(i => i.status !== 'Ok').length;
+    const pendentes = sessao.itens.filter(i => i.status !== 'Não necessitou reposição').length;
     const idDetalhe = 'detalhe-' + indice;
     html +=
       '<div class="linha-tabela" style="cursor:pointer;" onclick="document.getElementById(\'' + idDetalhe + '\').classList.toggle(\'aberto\')">' +
@@ -166,8 +166,8 @@ async function carregarHistorico() {
       '<span style="font-size:0.85rem; color:var(--cor-texto-suave);">' + formatarDataHora(sessao.dataHora) + '</span>' +
       '</div><div style="text-align:right;">' +
       (pendentes === 0
-        ? '<span class="etiqueta-status" data-s="Ok">Tudo Ok</span>'
-        : '<span class="etiqueta-status" data-s="Precisa repor">' + pendentes + ' com atenção</span>') +
+        ? '<span class="etiqueta-status" data-s="Não necessitou reposição">Tudo Ok</span>'
+        : '<span class="etiqueta-status" data-s="Está em falta no estoque">' + pendentes + ' com atenção</span>') +
       '</div></div>' +
       '<div class="detalhe-sessao" id="' + idDetalhe + '">' +
       sessao.itens.map(i =>
