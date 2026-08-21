@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alpine Reserva — Painel</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="painel-largura">
+
+<header class="topo">
+  <div>
+    <h1>Painel</h1>
+    <div class="subtitulo">Alpine Reserva — estoque e limpeza</div>
+  </div>
+  <a class="link-topo" href="index.html">Sair</a>
+</header>
+
+<main>
+
+  <div id="areaCarregando" class="aviso-carregando">Carregando...</div>
+  <div id="areaErro"></div>
+
+  <div id="conteudoPainel" style="display:none;">
+
+    <div class="abas">
+      <button class="aba-botao ativa" data-aba="pendentes">Pendentes de reposição</button>
+      <button class="aba-botao" data-aba="alertas">Alertas de estoque mínimo</button>
+      <button class="aba-botao" data-aba="historico">Histórico de limpezas</button>
+      <button class="aba-botao" data-aba="consumo">Consumo por período</button>
+    </div>
+
+    <section id="secaoPendentes" class="secao-painel ativa">
+      <div class="cartao">
+        <h2>Itens pendentes de reposição, por cabana</h2>
+        <div id="listaPendentes"></div>
+      </div>
+    </section>
+
+    <section id="secaoAlertas" class="secao-painel">
+      <div class="cartao">
+        <h2>Alertas de estoque mínimo</h2>
+        <p class="subtitulo" style="color:var(--cor-texto-suave);">
+          Itens que continuam pendentes há várias limpezas seguidas.
+        </p>
+        <div id="listaAlertas"></div>
+      </div>
+    </section>
+
+    <section id="secaoHistorico" class="secao-painel">
+      <div class="cartao">
+        <h2>Histórico de limpezas</h2>
+        <div class="filtros">
+          <div>
+            <label for="filtroCabanaHist">Cabana</label>
+            <select id="filtroCabanaHist"></select>
+          </div>
+          <div>
+            <label for="filtroDataInicioHist">De</label>
+            <input type="date" id="filtroDataInicioHist" />
+          </div>
+          <div>
+            <label for="filtroDataFimHist">Até</label>
+            <input type="date" id="filtroDataFimHist" />
+          </div>
+          <button class="botao botao-primario" id="botaoFiltrarHist">Filtrar</button>
+        </div>
+        <div id="listaHistorico"></div>
+      </div>
+    </section>
+
+    <section id="secaoConsumo" class="secao-painel">
+      <div class="cartao">
+        <h2>Consumo por período</h2>
+        <p class="subtitulo" style="color:var(--cor-texto-suave);">
+          Quantas vezes cada produto foi marcado "Repus agora".
+        </p>
+        <div class="filtros">
+          <div>
+            <label for="filtroDataInicioCons">De</label>
+            <input type="date" id="filtroDataInicioCons" />
+          </div>
+          <div>
+            <label for="filtroDataFimCons">Até</label>
+            <input type="date" id="filtroDataFimCons" />
+          </div>
+          <button class="botao botao-primario" id="botaoFiltrarConsumo">Filtrar</button>
+        </div>
+        <div id="listaConsumo"></div>
+      </div>
+    </section>
+
+  </div>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/login.js"></script>
+<script src="js/painel.js"></script>
+
+</body>
+</html>
