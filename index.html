@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alpine Reserva — Acesso</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="topo">
+  <div>
+    <h1>Alpine Reserva</h1>
+    <div class="subtitulo">Estoque e checklist de limpeza</div>
+  </div>
+</header>
+
+<main>
+
+  <div id="areaSenha" class="cartao">
+    <h2>Entrar</h2>
+    <div id="erroLogin"></div>
+    <form id="formLogin">
+      <label for="campoSenha">Senha</label>
+      <input type="password" id="campoSenha" autocomplete="current-password" required />
+      <br /><br />
+      <button type="submit" class="botao botao-primario" id="botaoEntrar">Entrar</button>
+    </form>
+  </div>
+
+  <div id="areaMenu" class="cartao" style="display:none;">
+    <h2>O que você quer fazer?</h2>
+    <div class="grade-cabanas">
+      <a class="cartao-cabana" href="limpeza.html">🧹 Registrar limpeza</a>
+      <a class="cartao-cabana" href="painel.html">📊 Ver painel</a>
+    </div>
+  </div>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+  const senhaSalva = sessionStorage.getItem('alpine_senha');
+  if (senhaSalva) {
+    document.getElementById('areaSenha').style.display = 'none';
+    document.getElementById('areaMenu').style.display = 'block';
+  }
+
+  document.getElementById('formLogin').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const erroDiv = document.getElementById('erroLogin');
+    const botao = document.getElementById('botaoEntrar');
+    const senha = document.getElementById('campoSenha').value;
+    erroDiv.innerHTML = '';
+    botao.disabled = true;
+    botao.textContent = 'Verificando...';
+
+    // Guarda temporariamente para a chamada de API usar, confirma antes de fixar.
+    sessionStorage.setItem('alpine_senha', senha);
+
+    try {
+      const resultado = await chamarApi('login', { senha: senha });
+      if (resultado && resultado.ok) {
+        document.getElementById('areaSenha').style.display = 'none';
+        document.getElementById('areaMenu').style.display = 'block';
+      } else {
+        sessionStorage.removeItem('alpine_senha');
+        erroDiv.innerHTML = '<div class="erro">Senha incorreta. Tente novamente.</div>';
+      }
+    } catch (err) {
+      sessionStorage.removeItem('alpine_senha');
+      erroDiv.innerHTML = '<div class="erro">' + err.message + '</div>';
+    } finally {
+      botao.disabled = false;
+      botao.textContent = 'Entrar';
+    }
+  });
+</script>
+
+</body>
+</html>
