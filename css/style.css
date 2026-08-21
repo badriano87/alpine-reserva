@@ -236,7 +236,7 @@ label {
   color: var(--cor-texto);
 }
 
-.botao-status[data-status="Ok"].selecionado {
+.botao-status[data-status="Não necessitou reposição"].selecionado {
   background: var(--cor-ok-fundo);
   border-color: var(--cor-ok);
   color: var(--cor-ok);
@@ -248,13 +248,13 @@ label {
   color: var(--cor-repus);
 }
 
-.botao-status[data-status="Precisa repor"].selecionado {
+.botao-status[data-status="Está em falta no estoque"].selecionado {
   background: var(--cor-precisa-fundo);
   border-color: var(--cor-precisa);
   color: var(--cor-precisa);
 }
 
-.botao-status[data-status="Faltando ou danificado"].selecionado {
+.botao-status[data-status="Danificado"].selecionado {
   background: var(--cor-faltando-fundo);
   border-color: var(--cor-faltando);
   color: var(--cor-faltando);
@@ -323,21 +323,19 @@ label {
   white-space: nowrap;
 }
 
-.etiqueta-status.Ok {
+.etiqueta-status[data-s="Não necessitou reposição"] {
   background: var(--cor-ok-fundo);
   color: var(--cor-ok);
 }
-.etiqueta-status.Repus.agora,
 .etiqueta-status[data-s="Repus agora"] {
   background: var(--cor-repus-fundo);
   color: var(--cor-repus);
 }
-.etiqueta-status.Precisa.repor,
-.etiqueta-status[data-s="Precisa repor"] {
+.etiqueta-status[data-s="Está em falta no estoque"] {
   background: var(--cor-precisa-fundo);
   color: var(--cor-precisa);
 }
-.etiqueta-status[data-s="Faltando ou danificado"] {
+.etiqueta-status[data-s="Danificado"] {
   background: var(--cor-faltando-fundo);
   color: var(--cor-faltando);
 }
