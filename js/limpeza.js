@@ -6,6 +6,7 @@ const STATUS_PADRAO = 'Não necessitou reposição';
 let cabanas = [];
 let produtos = [];
 let cabanaEscolhida = null;
+let dataLimpeza = null; // "AAAA-MM-DD" escolhida por quem está limpando
 let estadoItens = {}; // { "Produto": { status, observacao } }
 
 function escapeHtml(texto) {
@@ -46,14 +47,39 @@ function renderCabanas() {
 
 function escolherCabana(cabana) {
   cabanaEscolhida = cabana;
+
+  document.getElementById('tituloTopo').textContent = 'Limpeza — ' + cabana.nome;
+  document.getElementById('subtituloTopo').textContent = 'Qual o dia de hoje?';
+  document.getElementById('areaCabanas').style.display = 'none';
+
+  abrirTelaData();
+}
+
+function abrirTelaData() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoje.getDate()).padStart(2, '0');
+  document.getElementById('campoData').value = ano + '-' + mes + '-' + dia;
+  document.getElementById('areaData').style.display = 'block';
+}
+
+function confirmarData() {
+  const valor = document.getElementById('campoData').value;
+  if (!valor) {
+    alert('Escolha a data de hoje antes de continuar.');
+    return;
+  }
+  dataLimpeza = valor;
+
   estadoItens = {};
   produtos.forEach(p => {
     estadoItens[p.nome] = { status: STATUS_PADRAO, observacao: '' };
   });
 
-  document.getElementById('tituloTopo').textContent = 'Limpeza — ' + cabana.nome;
-  document.getElementById('subtituloTopo').textContent = 'Marque os itens que forem diferentes de "Ok"';
-  document.getElementById('areaCabanas').style.display = 'none';
+  document.getElementById('areaData').style.display = 'none';
+  document.getElementById('subtituloTopo').textContent =
+    'Marque os itens que forem diferentes de "' + STATUS_PADRAO + '"';
 
   renderChecklist();
 
@@ -147,6 +173,7 @@ async function salvarLimpeza() {
   try {
     const resultado = await chamarApi('salvarLimpeza', {
       cabana: cabanaEscolhida.nome,
+      dataLimpeza: dataLimpeza,
       itens: itens
     });
     if (!resultado || !resultado.ok) {
@@ -171,12 +198,14 @@ async function salvarLimpeza() {
 }
 
 document.getElementById('botaoSalvar').addEventListener('click', salvarLimpeza);
+document.getElementById('botaoConfirmarData').addEventListener('click', confirmarData);
 
 document.getElementById('botaoNovaLimpeza').addEventListener('click', () => {
   document.getElementById('areaConfirmacao').style.display = 'none';
   document.getElementById('tituloTopo').textContent = 'Registrar limpeza';
   document.getElementById('subtituloTopo').textContent = 'Escolha a cabana';
   cabanaEscolhida = null;
+  dataLimpeza = null;
   renderCabanas();
 });
 
