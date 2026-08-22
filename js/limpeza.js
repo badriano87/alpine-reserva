@@ -1,12 +1,10 @@
 // Tela da Liliane: registrar o status de cada produto durante a limpeza.
 
-const STATUS_OPCOES = ['Repus agora', 'Não necessitou reposição', 'Está em falta no estoque', 'Danificado'];
-const STATUS_PADRAO = 'Não necessitou reposição';
-
 let cabanas = [];
 let produtos = [];
 let cabanaEscolhida = null;
 let dataLimpeza = null; // "AAAA-MM-DD" escolhida por quem está limpando
+let notaHospede = null;
 let estadoItens = {}; // { "Produto": { status, observacao } }
 
 function escapeHtml(texto) {
@@ -71,28 +69,46 @@ function confirmarData() {
     return;
   }
   dataLimpeza = valor;
+  notaHospede = null;
 
   estadoItens = {};
   produtos.forEach(p => {
-    estadoItens[p.nome] = { status: STATUS_PADRAO, observacao: '' };
+    estadoItens[p.nome] = { status: statusPadrao(p.bloco, p.ambiente), observacao: '' };
   });
 
   document.getElementById('areaData').style.display = 'none';
-  document.getElementById('subtituloTopo').textContent =
-    'Marque os itens que forem diferentes de "' + STATUS_PADRAO + '"';
+  document.getElementById('subtituloTopo').textContent = 'Preencha o checklist da limpeza';
 
-  renderChecklist();
+  renderChecklistCompleto();
 
   document.getElementById('areaChecklist').style.display = 'block';
   document.getElementById('barraSalvar').style.display = 'block';
 }
 
-function renderChecklist() {
-  const container = document.getElementById('listaAmbientes');
+function produtosDoBloco(bloco) {
+  return produtos.filter(p => p.bloco === bloco);
+}
+
+function renderChecklistCompleto() {
+  renderBlocoFlat('blocoLimpeza', BLOCO_LIMPEZA);
+  renderBlocoAgrupado('blocoReposicao', BLOCO_REPOSICAO);
+  renderBlocoAgrupado('blocoConservacao', BLOCO_CONSERVACAO);
+  renderNota();
+}
+
+function renderBlocoFlat(containerId, bloco) {
+  const container = document.getElementById(containerId);
   container.innerHTML = '';
+  produtosDoBloco(bloco).forEach(p => container.appendChild(criarItemProduto(p)));
+}
+
+function renderBlocoAgrupado(containerId, bloco) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const itensBloco = produtosDoBloco(bloco);
 
   const ambientes = [];
-  produtos.forEach(p => {
+  itensBloco.forEach(p => {
     if (ambientes.indexOf(p.ambiente) === -1) ambientes.push(p.ambiente);
   });
 
@@ -105,7 +121,7 @@ function renderChecklist() {
     titulo.textContent = ambiente;
     secao.appendChild(titulo);
 
-    produtos
+    itensBloco
       .filter(p => p.ambiente === ambiente)
       .forEach(p => secao.appendChild(criarItemProduto(p)));
 
@@ -125,11 +141,11 @@ function criarItemProduto(produto) {
   const grade = document.createElement('div');
   grade.className = 'grade-status';
 
-  STATUS_OPCOES.forEach(status => {
+  const opcoes = opcoesStatus(produto.bloco, produto.ambiente);
+  opcoes.forEach(status => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'botao-status';
-    btn.dataset.status = status;
+    btn.className = 'botao-status nivel-' + nivelStatus(status);
     btn.textContent = status;
     if (estadoItens[produto.nome].status === status) {
       btn.classList.add('selecionado');
@@ -158,12 +174,39 @@ function criarItemProduto(produto) {
   return item;
 }
 
+function renderNota() {
+  const container = document.getElementById('blocoNota');
+  container.innerHTML = '';
+  const grade = document.createElement('div');
+  grade.className = 'grade-notas';
+  NOTAS_HOSPEDE.forEach((texto, indice) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'botao-nota';
+    btn.textContent = (indice + 1) + ' — ' + texto;
+    if (notaHospede === texto) btn.classList.add('selecionado');
+    btn.addEventListener('click', () => {
+      notaHospede = texto;
+      grade.querySelectorAll('.botao-nota').forEach(b => b.classList.remove('selecionado'));
+      btn.classList.add('selecionado');
+    });
+    grade.appendChild(btn);
+  });
+  container.appendChild(grade);
+}
+
 async function salvarLimpeza() {
+  if (!notaHospede) {
+    alert('Escolha a nota que você dá para este hóspede antes de salvar.');
+    return;
+  }
+
   const botao = document.getElementById('botaoSalvar');
   botao.disabled = true;
   botao.textContent = 'Salvando...';
 
   const itens = produtos.map(p => ({
+    bloco: p.bloco,
     ambiente: p.ambiente,
     produto: p.nome,
     status: estadoItens[p.nome].status,
@@ -174,17 +217,18 @@ async function salvarLimpeza() {
     const resultado = await chamarApi('salvarLimpeza', {
       cabana: cabanaEscolhida.nome,
       dataLimpeza: dataLimpeza,
+      nota: notaHospede,
       itens: itens
     });
     if (!resultado || !resultado.ok) {
       throw new Error((resultado && resultado.erro) || 'Não foi possível salvar.');
     }
 
-    const pendentes = itens.filter(i => i.status !== STATUS_PADRAO).length;
+    const pendentes = itens.filter(i => nivelStatus(i.status) !== 'otimo').length;
     document.getElementById('resumoConfirmacao').textContent =
       pendentes === 0
         ? 'Tudo certo por aqui — nenhum item pendente.'
-        : pendentes + ' item(ns) marcados com atenção (reposição ou dano).';
+        : pendentes + ' item(ns) marcados com atenção (reposição, falta ou dano).';
 
     document.getElementById('areaChecklist').style.display = 'none';
     document.getElementById('barraSalvar').style.display = 'none';
@@ -206,6 +250,7 @@ document.getElementById('botaoNovaLimpeza').addEventListener('click', () => {
   document.getElementById('subtituloTopo').textContent = 'Escolha a cabana';
   cabanaEscolhida = null;
   dataLimpeza = null;
+  notaHospede = null;
   renderCabanas();
 });
 
