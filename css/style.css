@@ -13,6 +13,8 @@
   --cor-repus-fundo: #e6f0f9;
   --cor-precisa: #c98a1f;
   --cor-precisa-fundo: #fbf0dd;
+  --cor-critico: #c2650f;
+  --cor-critico-fundo: #fbe4d0;
   --cor-faltando: #c34343;
   --cor-faltando-fundo: #fbe8e8;
 
@@ -236,28 +238,81 @@ label {
   color: var(--cor-texto);
 }
 
-.botao-status[data-status="Não necessitou reposição"].selecionado {
+.botao-status.nivel-otimo.selecionado {
   background: var(--cor-ok-fundo);
   border-color: var(--cor-ok);
   color: var(--cor-ok);
 }
 
-.botao-status[data-status="Repus agora"].selecionado {
+.botao-status.nivel-bom.selecionado {
   background: var(--cor-repus-fundo);
   border-color: var(--cor-repus);
   color: var(--cor-repus);
 }
 
-.botao-status[data-status="Está em falta no estoque"].selecionado {
+.botao-status.nivel-atencao.selecionado {
   background: var(--cor-precisa-fundo);
   border-color: var(--cor-precisa);
   color: var(--cor-precisa);
 }
 
-.botao-status[data-status="Danificado"].selecionado {
+.botao-status.nivel-critico.selecionado {
+  background: var(--cor-critico-fundo);
+  border-color: var(--cor-critico);
+  color: var(--cor-critico);
+}
+
+.botao-status.nivel-falta.selecionado {
   background: var(--cor-faltando-fundo);
   border-color: var(--cor-faltando);
   color: var(--cor-faltando);
+}
+
+.bloco-titulo {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--cor-primaria-escura);
+  margin: 1.75rem 0 0.9rem 0.1rem;
+  padding-top: 1.25rem;
+  border-top: 2px solid var(--cor-borda);
+}
+
+.bloco-titulo:first-child {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.grade-notas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.botao-nota {
+  min-height: 48px;
+  border-radius: 10px;
+  border: 2px solid var(--cor-borda);
+  background: #fff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem 0.9rem;
+  text-align: left;
+  color: var(--cor-texto);
+}
+
+.botao-nota.selecionado {
+  background: var(--cor-repus-fundo);
+  border-color: var(--cor-repus);
+  color: var(--cor-repus);
+}
+
+.cartao-avaliacao {
+  padding: 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  margin-bottom: 1rem;
 }
 
 .campo-obs {
@@ -323,19 +378,23 @@ label {
   white-space: nowrap;
 }
 
-.etiqueta-status[data-s="Não necessitou reposição"] {
+.etiqueta-status.nivel-otimo {
   background: var(--cor-ok-fundo);
   color: var(--cor-ok);
 }
-.etiqueta-status[data-s="Repus agora"] {
+.etiqueta-status.nivel-bom {
   background: var(--cor-repus-fundo);
   color: var(--cor-repus);
 }
-.etiqueta-status[data-s="Está em falta no estoque"] {
+.etiqueta-status.nivel-atencao {
   background: var(--cor-precisa-fundo);
   color: var(--cor-precisa);
 }
-.etiqueta-status[data-s="Danificado"] {
+.etiqueta-status.nivel-critico {
+  background: var(--cor-critico-fundo);
+  color: var(--cor-critico);
+}
+.etiqueta-status.nivel-falta {
   background: var(--cor-faltando-fundo);
   color: var(--cor-faltando);
 }
