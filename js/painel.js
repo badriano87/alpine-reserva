@@ -170,7 +170,8 @@ async function carregarHistorico() {
 
     let html = '';
     resultado.historico.forEach((sessao, indice) => {
-      const pendentes = sessao.itens.filter(i => nivelStatus(i.status) !== 'otimo').length;
+      const niveisAtencao = ['atencao', 'critico', 'falta'];
+      const pendentes = sessao.itens.filter(i => niveisAtencao.includes(nivelStatus(i.status))).length;
       const idDetalhe = 'detalhe-' + indice;
       html +=
         '<div class="linha-tabela" style="cursor:pointer;" onclick="document.getElementById(\'' + idDetalhe + '\').classList.toggle(\'aberto\')">' +
