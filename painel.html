@@ -24,26 +24,39 @@
   <div id="conteudoPainel" style="display:none;">
 
     <div class="abas">
-      <button class="aba-botao ativa" data-aba="pendentes">Pendentes de reposição</button>
-      <button class="aba-botao" data-aba="alertas">Alertas de estoque mínimo</button>
+      <button class="aba-botao ativa" data-aba="comprar">O que preciso comprar</button>
+      <button class="aba-botao" data-aba="embreve">Em breve vai ser necessário</button>
+      <button class="aba-botao" data-aba="avaliacao">Avaliação do hóspede</button>
       <button class="aba-botao" data-aba="historico">Histórico de limpezas</button>
-      <button class="aba-botao" data-aba="consumo">Consumo por período</button>
     </div>
 
-    <section id="secaoPendentes" class="secao-painel ativa">
+    <section id="secaoComprar" class="secao-painel ativa">
       <div class="cartao">
-        <h2>Itens pendentes de reposição, por cabana</h2>
-        <div id="listaPendentes"></div>
+        <h2>O que preciso comprar</h2>
+        <p class="subtitulo" style="color:var(--cor-texto-suave);">
+          Itens em falta ou impossíveis de usar, por cabana.
+        </p>
+        <div id="listaComprar"></div>
       </div>
     </section>
 
-    <section id="secaoAlertas" class="secao-painel">
+    <section id="secaoEmbreve" class="secao-painel">
       <div class="cartao">
-        <h2>Alertas de estoque mínimo</h2>
+        <h2>Em breve vai ser necessário</h2>
         <p class="subtitulo" style="color:var(--cor-texto-suave);">
-          Itens que continuam pendentes há várias limpezas seguidas.
+          Itens com menos da metade ou com dano — ainda dá para usar, mas fique de olho.
         </p>
-        <div id="listaAlertas"></div>
+        <div id="listaEmbreve"></div>
+      </div>
+    </section>
+
+    <section id="secaoAvaliacao" class="secao-painel">
+      <div class="cartao">
+        <h2>Avaliação do hóspede anterior</h2>
+        <p class="subtitulo" style="color:var(--cor-texto-suave);">
+          Nota da última limpeza de cada cabana e quanto os itens de reposição foram usados.
+        </p>
+        <div id="listaAvaliacao"></div>
       </div>
     </section>
 
@@ -69,27 +82,6 @@
       </div>
     </section>
 
-    <section id="secaoConsumo" class="secao-painel">
-      <div class="cartao">
-        <h2>Consumo por período</h2>
-        <p class="subtitulo" style="color:var(--cor-texto-suave);">
-          Quantas vezes cada produto foi marcado "Repus agora".
-        </p>
-        <div class="filtros">
-          <div>
-            <label for="filtroDataInicioCons">De</label>
-            <input type="date" id="filtroDataInicioCons" />
-          </div>
-          <div>
-            <label for="filtroDataFimCons">Até</label>
-            <input type="date" id="filtroDataFimCons" />
-          </div>
-          <button class="botao botao-primario" id="botaoFiltrarConsumo">Filtrar</button>
-        </div>
-        <div id="listaConsumo"></div>
-      </div>
-    </section>
-
   </div>
 
 </main>
@@ -97,6 +89,7 @@
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/login.js"></script>
+<script src="js/blocos.js"></script>
 <script src="js/painel.js"></script>
 
 </body>
