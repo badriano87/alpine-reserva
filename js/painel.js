@@ -1,4 +1,5 @@
-// Painel do dono: pendências, alertas, histórico e consumo.
+// Painel do dono: o que comprar, o que vai ser necessário em breve,
+// avaliação do hóspede anterior e histórico de limpezas.
 
 let cabanasDisponiveis = [];
 
@@ -13,12 +14,8 @@ function formatarDataHora(isoString) {
   return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatarData(isoString) {
-  return new Date(isoString).toLocaleDateString('pt-BR');
-}
-
 function etiquetaStatus(status) {
-  return '<span class="etiqueta-status" data-s="' + escapeHtml(status) + '">' + escapeHtml(status) + '</span>';
+  return '<span class="etiqueta-status nivel-' + nivelStatus(status) + '">' + escapeHtml(status) + '</span>';
 }
 
 async function iniciar() {
@@ -34,7 +31,7 @@ async function iniciar() {
     document.getElementById('conteudoPainel').style.display = 'block';
 
     configurarAbas();
-    await Promise.all([carregarPendentes(), carregarAlertas(), carregarHistorico(), carregarConsumo()]);
+    await Promise.all([carregarComprar(), carregarEmBreve(), carregarAvaliacao(), carregarHistorico()]);
   } catch (err) {
     document.getElementById('areaCarregando').style.display = 'none';
     document.getElementById('areaErro').innerHTML =
@@ -68,69 +65,86 @@ function capitalizar(texto) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
-// ---- Pendentes ----
+// ---- Listas genéricas de itens (comprar / em breve) ----
 
-async function carregarPendentes() {
-  const resultado = await chamarApi('getPendentes');
-  const div = document.getElementById('listaPendentes');
-  if (!resultado || !resultado.ok) {
-    div.innerHTML = '<div class="erro">Erro ao carregar pendentes.</div>';
-    return;
-  }
-  if (resultado.pendentes.length === 0) {
-    div.innerHTML = '<div class="vazio">Nenhum item pendente no momento. 🎉</div>';
+function renderizarListaItens(divId, itens, mensagemVazia) {
+  const div = document.getElementById(divId);
+  if (itens.length === 0) {
+    div.innerHTML = '<div class="vazio">' + mensagemVazia + '</div>';
     return;
   }
 
   const porCabana = {};
-  resultado.pendentes.forEach(p => {
-    if (!porCabana[p.cabana]) porCabana[p.cabana] = [];
-    porCabana[p.cabana].push(p);
+  itens.forEach(i => {
+    if (!porCabana[i.cabana]) porCabana[i.cabana] = [];
+    porCabana[i.cabana].push(i);
   });
 
   let html = '';
   Object.keys(porCabana).forEach(cabana => {
     html += '<h3>' + escapeHtml(cabana) + '</h3>';
-    porCabana[cabana].forEach(p => {
+    porCabana[cabana].forEach(i => {
       html +=
         '<div class="linha-tabela"><div>' +
-        '<strong>' + escapeHtml(p.produto) + '</strong> — ' + escapeHtml(p.ambiente) +
-        (p.observacao ? '<br><span style="color:var(--cor-texto-suave); font-size:0.85rem;">' + escapeHtml(p.observacao) + '</span>' : '') +
+        '<strong>' + escapeHtml(i.produto) + '</strong>' +
+        (i.ambiente ? ' — ' + escapeHtml(i.ambiente) : '') +
+        (i.observacao ? '<br><span style="color:var(--cor-texto-suave); font-size:0.85rem;">' + escapeHtml(i.observacao) + '</span>' : '') +
         '</div><div style="text-align:right;">' +
-        etiquetaStatus(p.status) +
-        '<br><span style="font-size:0.75rem; color:var(--cor-texto-suave);">' + formatarDataHora(p.dataHora) + '</span>' +
+        etiquetaStatus(i.status) +
+        '<br><span style="font-size:0.75rem; color:var(--cor-texto-suave);">' + formatarDataHora(i.dataHora) + '</span>' +
         '</div></div>';
     });
   });
   div.innerHTML = html;
 }
 
-// ---- Alertas ----
-
-async function carregarAlertas() {
-  const resultado = await chamarApi('getAlertas');
-  const div = document.getElementById('listaAlertas');
-  if (!resultado || !resultado.ok) {
-    div.innerHTML = '<div class="erro">Erro ao carregar alertas.</div>';
-    return;
+async function carregarComprar() {
+  try {
+    const resultado = await chamarApi('getComprar');
+    if (!resultado || !resultado.ok) throw new Error();
+    renderizarListaItens('listaComprar', resultado.itens, 'Nada pendente de compra no momento. 🎉');
+  } catch (err) {
+    document.getElementById('listaComprar').innerHTML = '<div class="erro">Erro ao carregar.</div>';
   }
-  if (resultado.alertas.length === 0) {
-    div.innerHTML = '<div class="vazio">Nenhum alerta de estoque mínimo.</div>';
-    return;
-  }
+}
 
-  let html = '';
-  resultado.alertas.forEach(a => {
-    html +=
-      '<div class="linha-tabela"><div>' +
-      '<strong>' + escapeHtml(a.produto) + '</strong> — ' + escapeHtml(a.cabana) + ' · ' + escapeHtml(a.ambiente) +
-      '</div><div style="text-align:right;">' +
-      etiquetaStatus(a.ultimoStatus) +
-      '<br><span style="font-size:0.75rem; color:var(--cor-texto-suave);">' +
-      a.limpezasSeguidasPendente + ' limpezas seguidas pendente</span>' +
-      '</div></div>';
-  });
-  div.innerHTML = html;
+async function carregarEmBreve() {
+  try {
+    const resultado = await chamarApi('getEmBreve');
+    if (!resultado || !resultado.ok) throw new Error();
+    renderizarListaItens('listaEmbreve', resultado.itens, 'Nada precisando de atenção em breve.');
+  } catch (err) {
+    document.getElementById('listaEmbreve').innerHTML = '<div class="erro">Erro ao carregar.</div>';
+  }
+}
+
+// ---- Avaliação do hóspede anterior ----
+
+async function carregarAvaliacao() {
+  const div = document.getElementById('listaAvaliacao');
+  try {
+    const resultado = await chamarApi('getAvaliacaoHospede');
+    if (!resultado || !resultado.ok) throw new Error();
+    if (resultado.avaliacoes.length === 0) {
+      div.innerHTML = '<div class="vazio">Nenhuma avaliação registrada ainda.</div>';
+      return;
+    }
+    let html = '';
+    resultado.avaliacoes.forEach(a => {
+      const pct = Math.round(a.percentualNaoUsado * 100);
+      html +=
+        '<div class="cartao-avaliacao">' +
+        '<h3>' + escapeHtml(a.cabana) + '</h3>' +
+        '<div style="font-size:0.85rem; color:var(--cor-texto-suave);">' + formatarDataHora(a.dataHora) + '</div>' +
+        '<div style="margin-top:0.5rem;"><strong>Nota da limpeza:</strong> ' + escapeHtml(a.nota) + '</div>' +
+        '<div style="margin-top:0.25rem;"><strong>Uso dos itens de reposição:</strong> ' + escapeHtml(a.nivelUso) +
+        ' <span style="color:var(--cor-texto-suave);">(' + pct + '% não precisou repor)</span></div>' +
+        '</div>';
+    });
+    div.innerHTML = html;
+  } catch (err) {
+    div.innerHTML = '<div class="erro">Erro ao carregar.</div>';
+  }
 }
 
 // ---- Histórico ----
@@ -145,73 +159,42 @@ async function carregarHistorico() {
   if (dataInicio) params.dataInicio = dataInicio + 'T00:00:00';
   if (dataFim) params.dataFim = dataFim + 'T23:59:59';
 
-  const resultado = await chamarApi('getHistorico', params);
   const div = document.getElementById('listaHistorico');
-  if (!resultado || !resultado.ok) {
-    div.innerHTML = '<div class="erro">Erro ao carregar histórico.</div>';
-    return;
-  }
-  if (resultado.historico.length === 0) {
-    div.innerHTML = '<div class="vazio">Nenhuma limpeza registrada nesse período.</div>';
-    return;
-  }
+  try {
+    const resultado = await chamarApi('getHistorico', params);
+    if (!resultado || !resultado.ok) throw new Error();
+    if (resultado.historico.length === 0) {
+      div.innerHTML = '<div class="vazio">Nenhuma limpeza registrada nesse período.</div>';
+      return;
+    }
 
-  let html = '';
-  resultado.historico.forEach((sessao, indice) => {
-    const pendentes = sessao.itens.filter(i => i.status !== 'Não necessitou reposição').length;
-    const idDetalhe = 'detalhe-' + indice;
-    html +=
-      '<div class="linha-tabela" style="cursor:pointer;" onclick="document.getElementById(\'' + idDetalhe + '\').classList.toggle(\'aberto\')">' +
-      '<div><strong>' + escapeHtml(sessao.cabana) + '</strong><br>' +
-      '<span style="font-size:0.85rem; color:var(--cor-texto-suave);">' + formatarDataHora(sessao.dataHora) + '</span>' +
-      '</div><div style="text-align:right;">' +
-      (pendentes === 0
-        ? '<span class="etiqueta-status" data-s="Não necessitou reposição">Tudo Ok</span>'
-        : '<span class="etiqueta-status" data-s="Está em falta no estoque">' + pendentes + ' com atenção</span>') +
-      '</div></div>' +
-      '<div class="detalhe-sessao" id="' + idDetalhe + '">' +
-      sessao.itens.map(i =>
-        '<div class="linha-item-sessao"><span>' + escapeHtml(i.ambiente) + ' — ' + escapeHtml(i.produto) +
-        (i.observacao ? ' <em>(' + escapeHtml(i.observacao) + ')</em>' : '') + '</span>' +
-        etiquetaStatus(i.status) + '</div>'
-      ).join('') +
-      '</div>';
-  });
-  div.innerHTML = html;
+    let html = '';
+    resultado.historico.forEach((sessao, indice) => {
+      const pendentes = sessao.itens.filter(i => nivelStatus(i.status) !== 'otimo').length;
+      const idDetalhe = 'detalhe-' + indice;
+      html +=
+        '<div class="linha-tabela" style="cursor:pointer;" onclick="document.getElementById(\'' + idDetalhe + '\').classList.toggle(\'aberto\')">' +
+        '<div><strong>' + escapeHtml(sessao.cabana) + '</strong><br>' +
+        '<span style="font-size:0.85rem; color:var(--cor-texto-suave);">' + formatarDataHora(sessao.dataHora) + '</span>' +
+        '</div><div style="text-align:right;">' +
+        (pendentes === 0
+          ? '<span class="etiqueta-status nivel-otimo">Tudo Ok</span>'
+          : '<span class="etiqueta-status nivel-falta">' + pendentes + ' com atenção</span>') +
+        '</div></div>' +
+        '<div class="detalhe-sessao" id="' + idDetalhe + '">' +
+        sessao.itens.map(i =>
+          '<div class="linha-item-sessao"><span>' + escapeHtml(i.ambiente || i.bloco) + ' — ' + escapeHtml(i.produto) +
+          (i.observacao ? ' <em>(' + escapeHtml(i.observacao) + ')</em>' : '') + '</span>' +
+          etiquetaStatus(i.status) + '</div>'
+        ).join('') +
+        '</div>';
+    });
+    div.innerHTML = html;
+  } catch (err) {
+    div.innerHTML = '<div class="erro">Erro ao carregar histórico.</div>';
+  }
 }
 
 document.getElementById('botaoFiltrarHist').addEventListener('click', carregarHistorico);
-
-// ---- Consumo ----
-
-async function carregarConsumo() {
-  const dataInicio = document.getElementById('filtroDataInicioCons').value;
-  const dataFim = document.getElementById('filtroDataFimCons').value;
-
-  const params = {};
-  if (dataInicio) params.dataInicio = dataInicio + 'T00:00:00';
-  if (dataFim) params.dataFim = dataFim + 'T23:59:59';
-
-  const resultado = await chamarApi('getConsumo', params);
-  const div = document.getElementById('listaConsumo');
-  if (!resultado || !resultado.ok) {
-    div.innerHTML = '<div class="erro">Erro ao carregar consumo.</div>';
-    return;
-  }
-  if (resultado.consumo.length === 0) {
-    div.innerHTML = '<div class="vazio">Nenhuma reposição registrada nesse período.</div>';
-    return;
-  }
-
-  let html = '';
-  resultado.consumo.forEach(c => {
-    html +=
-      '<div class="linha-tabela"><div><strong>' + escapeHtml(c.produto) + '</strong> — ' + escapeHtml(c.cabana) + '</div>' +
-      '<div>' + c.vezesReposto + 'x reposto</div></div>';
-  });
-  div.innerHTML = html;
-}
-
-document.getElementById('botaoFiltrarConsumo').addEventListener('click', carregarConsumo);
 
 iniciar();
