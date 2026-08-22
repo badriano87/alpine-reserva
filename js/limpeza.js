@@ -224,7 +224,8 @@ async function salvarLimpeza() {
       throw new Error((resultado && resultado.erro) || 'Não foi possível salvar.');
     }
 
-    const pendentes = itens.filter(i => nivelStatus(i.status) !== 'otimo').length;
+    const NIVEIS_ATENCAO = ['atencao', 'critico', 'falta'];
+    const pendentes = itens.filter(i => NIVEIS_ATENCAO.includes(nivelStatus(i.status))).length;
     document.getElementById('resumoConfirmacao').textContent =
       pendentes === 0
         ? 'Tudo certo por aqui — nenhum item pendente.'
