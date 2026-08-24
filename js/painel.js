@@ -136,7 +136,8 @@ async function carregarAvaliacao() {
         '<div class="cartao-avaliacao">' +
         '<h3>' + escapeHtml(a.cabana) + '</h3>' +
         '<div style="font-size:0.85rem; color:var(--cor-texto-suave);">' + formatarDataHora(a.dataHora) + '</div>' +
-        '<div style="margin-top:0.5rem;"><strong>Nota da limpeza:</strong> ' + escapeHtml(a.nota) + '</div>' +
+        '<div style="margin-top:0.5rem;"><strong>Nota da limpeza:</strong> ' +
+        (NOTAS_HOSPEDE.indexOf(a.nota) + 1) + '/10 — ' + escapeHtml(a.nota) + '</div>' +
         '<div style="margin-top:0.25rem;"><strong>Uso dos itens de reposição:</strong> ' + escapeHtml(a.nivelUso) +
         ' <span style="color:var(--cor-texto-suave);">(' + pct + '% não precisou repor)</span></div>' +
         '</div>';
