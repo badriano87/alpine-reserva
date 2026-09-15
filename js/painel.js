@@ -281,6 +281,8 @@ if (botaoFiltrarHistEl) botaoFiltrarHistEl.addEventListener('click', carregarHis
 
 // ---- Compras ----
 
+let compraEmEdicaoId = null;
+
 function prepararFormularioCompra() {
   const campoData = document.getElementById('compraData');
   if (!campoData) return;
@@ -291,13 +293,52 @@ function prepararFormularioCompra() {
     evento.preventDefault();
     await enviarCompra();
   });
+
+  document.getElementById('botaoCancelarEdicaoCompra').addEventListener('click', cancelarEdicaoCompra);
+}
+
+function iniciarEdicaoCompra(compra) {
+  compraEmEdicaoId = compra.idCompra;
+  document.getElementById('compraProduto').value = compra.produto;
+  document.getElementById('compraQuantidade').value = compra.quantidade;
+  document.getElementById('compraUnidade').value = compra.unidade;
+  document.getElementById('compraValor').value = compra.valor;
+  document.getElementById('compraData').value = compra.dataCompra.slice(0, 10);
+  document.getElementById('compraLoja').value = compra.loja;
+  document.getElementById('compraObs').value = compra.observacao;
+
+  document.getElementById('tituloFormCompra').textContent = 'Editar compra';
+  document.getElementById('botaoEnviarCompra').textContent = 'Salvar alteração';
+  document.getElementById('botaoCancelarEdicaoCompra').style.display = 'block';
+  document.getElementById('mensagemCompra').innerHTML = '';
+  document.getElementById('formCompra').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function limparFormularioCompra() {
+  document.getElementById('compraQuantidade').value = '';
+  document.getElementById('compraUnidade').value = '';
+  document.getElementById('compraValor').value = '';
+  document.getElementById('compraLoja').value = '';
+  document.getElementById('compraObs').value = '';
+  const hoje = new Date();
+  document.getElementById('compraData').value = hoje.toISOString().slice(0, 10);
+}
+
+function cancelarEdicaoCompra() {
+  compraEmEdicaoId = null;
+  limparFormularioCompra();
+  document.getElementById('tituloFormCompra').textContent = 'Registrar compra';
+  document.getElementById('botaoEnviarCompra').textContent = 'Registrar compra';
+  document.getElementById('botaoCancelarEdicaoCompra').style.display = 'none';
+  document.getElementById('mensagemCompra').innerHTML = '';
 }
 
 async function enviarCompra() {
-  const botao = document.querySelector('#formCompra button[type="submit"]');
+  const botao = document.getElementById('botaoEnviarCompra');
   const mensagem = document.getElementById('mensagemCompra');
   mensagem.innerHTML = '';
 
+  const estaEditando = !!compraEmEdicaoId;
   const dados = {
     produto: document.getElementById('compraProduto').value,
     quantidade: document.getElementById('compraQuantidade').value,
@@ -307,26 +348,28 @@ async function enviarCompra() {
     loja: document.getElementById('compraLoja').value,
     observacao: document.getElementById('compraObs').value
   };
+  if (estaEditando) dados.idCompra = compraEmEdicaoId;
 
   botao.disabled = true;
   botao.textContent = 'Salvando...';
   try {
-    const resultado = await chamarApi('registrarCompra', dados);
+    const resultado = await chamarApi(estaEditando ? 'editarCompra' : 'registrarCompra', dados);
     if (!resultado || !resultado.ok) throw new Error();
 
-    document.getElementById('compraQuantidade').value = '';
-    document.getElementById('compraUnidade').value = '';
-    document.getElementById('compraValor').value = '';
-    document.getElementById('compraLoja').value = '';
-    document.getElementById('compraObs').value = '';
-    mensagem.innerHTML = '<div class="mensagem-sucesso">Compra registrada! O item também foi dado como resolvido nas listas de alerta.</div>';
+    if (estaEditando) {
+      cancelarEdicaoCompra();
+      mensagem.innerHTML = '<div class="mensagem-sucesso">Compra atualizada!</div>';
+    } else {
+      limparFormularioCompra();
+      mensagem.innerHTML = '<div class="mensagem-sucesso">Compra registrada! O item também foi dado como resolvido nas listas de alerta.</div>';
+    }
 
     await Promise.all([carregarCompras(), carregarComprar(), carregarEmBreve(), carregarAnalises()]);
   } catch (err) {
-    mensagem.innerHTML = '<div class="erro">Não foi possível registrar a compra. Tente de novo.</div>';
+    mensagem.innerHTML = '<div class="erro">Não foi possível salvar a compra. Tente de novo.</div>';
   } finally {
     botao.disabled = false;
-    botao.textContent = 'Registrar compra';
+    botao.textContent = compraEmEdicaoId ? 'Salvar alteração' : 'Registrar compra';
   }
 }
 
@@ -340,10 +383,15 @@ async function carregarCompras() {
       div.innerHTML = '<div class="vazio">Nenhuma compra registrada ainda.</div>';
       return;
     }
-    let html = '';
+    div.innerHTML = '';
     resultado.compras.forEach(c => {
-      html +=
-        '<div class="linha-tabela"><div>' +
+      const quantidade = Number(c.quantidade) || 0;
+      const valorUnitario = quantidade > 0 ? c.valor / quantidade : null;
+
+      const linha = document.createElement('div');
+      linha.className = 'linha-tabela';
+      linha.innerHTML =
+        '<div>' +
         '<strong>' + escapeHtml(c.produto) + '</strong><br>' +
         '<span style="font-size:0.85rem; color:var(--cor-texto-suave);">' +
         escapeHtml(c.quantidade) + ' ' + escapeHtml(c.unidade) +
@@ -353,9 +401,15 @@ async function carregarCompras() {
         '</div><div style="text-align:right;">' +
         '<strong>' + formatarValor(c.valor) + '</strong>' +
         '<br><span style="font-size:0.75rem; color:var(--cor-texto-suave);">' + formatarData(c.dataCompra) + '</span>' +
-        '</div></div>';
+        (valorUnitario !== null
+          ? '<br><span style="font-size:0.75rem; color:var(--cor-texto-suave);">' + formatarValor(valorUnitario) + '/' + escapeHtml(c.unidade || 'unidade') + '</span>'
+          : '') +
+        '<br><button type="button" class="botao-resolver" style="margin-top:0.4rem;">Editar</button>' +
+        '</div>';
+
+      linha.querySelector('button').addEventListener('click', () => iniciarEdicaoCompra(c));
+      div.appendChild(linha);
     });
-    div.innerHTML = html;
   } catch (err) {
     div.innerHTML = '<div class="erro">Erro ao carregar.</div>';
   }

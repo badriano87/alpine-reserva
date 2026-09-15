@@ -53,7 +53,7 @@
 
     <section id="secaoCompras" class="secao-painel">
       <div class="cartao">
-        <h2>Registrar compra</h2>
+        <h2 id="tituloFormCompra">Registrar compra</h2>
         <p class="subtitulo" style="color:var(--cor-texto-suave);">
           Estoque unificado, sem separar por cabana. Ao registrar, o produto some das
           listas de alerta em todas as cabanas (igual ao botão "Dar baixa").
@@ -91,7 +91,8 @@
             <label for="compraObs">Observação (opcional)</label>
             <input type="text" id="compraObs" />
           </div>
-          <button type="submit" class="botao botao-primario">Registrar compra</button>
+          <button type="submit" class="botao botao-primario" id="botaoEnviarCompra">Registrar compra</button>
+          <button type="button" class="botao botao-secundario" id="botaoCancelarEdicaoCompra" style="display:none; margin-top:0.5rem;">Cancelar edição</button>
           <div id="mensagemCompra"></div>
         </form>
       </div>
