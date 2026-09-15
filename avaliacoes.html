@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alpine Reserva — Avaliações dos Hóspedes</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="painel-largura">
+
+<header class="topo">
+  <div>
+    <h1>Avaliações dos Hóspedes</h1>
+    <div class="subtitulo">Alpine Reserva</div>
+  </div>
+  <a class="link-topo" href="index.html">Sair</a>
+</header>
+
+<main>
+
+  <div id="areaCarregando" class="aviso-carregando">Carregando...</div>
+  <div id="areaErro"></div>
+
+  <div id="conteudoPainel" style="display:none;">
+
+    <div class="cartao">
+      <h2>Avaliação do hóspede anterior</h2>
+      <p class="subtitulo" style="color:var(--cor-texto-suave);">
+        Nota da última limpeza de cada cabana e quanto os itens de reposição foram usados.
+      </p>
+      <div id="listaAvaliacao"></div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/login.js"></script>
+<script src="js/blocos.js"></script>
+<script src="js/painel.js"></script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Configuração compartilhada dos blocos do checklist (limpeza.html e painel.html).
+// Configuração compartilhada dos blocos do checklist (limpeza.html, estoque.html e avaliacoes.html).
 
 const BLOCO_LIMPEZA = 'Limpeza';
 const BLOCO_REPOSICAO = 'Reposicao';

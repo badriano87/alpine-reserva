@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Alpine Reserva — Painel</title>
+<title>Alpine Reserva — Estoque e Compras</title>
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="painel-largura">
 
 <header class="topo">
   <div>
-    <h1>Painel</h1>
-    <div class="subtitulo">Alpine Reserva — estoque e limpeza</div>
+    <h1>Estoque e Compras</h1>
+    <div class="subtitulo">Alpine Reserva</div>
   </div>
   <a class="link-topo" href="index.html">Sair</a>
 </header>
@@ -26,9 +26,8 @@
     <div class="abas">
       <button class="aba-botao ativa" data-aba="comprar">O que preciso comprar</button>
       <button class="aba-botao" data-aba="embreve">Em breve vai ser necessário</button>
-      <button class="aba-botao" data-aba="avaliacao">Avaliação do hóspede</button>
-      <button class="aba-botao" data-aba="historico">Histórico de limpezas</button>
       <button class="aba-botao" data-aba="compras">Registrar compra</button>
+      <button class="aba-botao" data-aba="historico">Histórico de limpezas</button>
     </div>
 
     <section id="secaoComprar" class="secao-painel ativa">
@@ -48,38 +47,6 @@
           Itens com menos da metade ou com dano — ainda dá para usar, mas fique de olho.
         </p>
         <div id="listaEmbreve"></div>
-      </div>
-    </section>
-
-    <section id="secaoAvaliacao" class="secao-painel">
-      <div class="cartao">
-        <h2>Avaliação do hóspede anterior</h2>
-        <p class="subtitulo" style="color:var(--cor-texto-suave);">
-          Nota da última limpeza de cada cabana e quanto os itens de reposição foram usados.
-        </p>
-        <div id="listaAvaliacao"></div>
-      </div>
-    </section>
-
-    <section id="secaoHistorico" class="secao-painel">
-      <div class="cartao">
-        <h2>Histórico de limpezas</h2>
-        <div class="filtros">
-          <div>
-            <label for="filtroCabanaHist">Cabana</label>
-            <select id="filtroCabanaHist"></select>
-          </div>
-          <div>
-            <label for="filtroDataInicioHist">De</label>
-            <input type="date" id="filtroDataInicioHist" />
-          </div>
-          <div>
-            <label for="filtroDataFimHist">Até</label>
-            <input type="date" id="filtroDataFimHist" />
-          </div>
-          <button class="botao botao-primario" id="botaoFiltrarHist">Filtrar</button>
-        </div>
-        <div id="listaHistorico"></div>
       </div>
     </section>
 
@@ -131,6 +98,28 @@
       <div class="cartao">
         <h2>Compras registradas</h2>
         <div id="listaCompras"></div>
+      </div>
+    </section>
+
+    <section id="secaoHistorico" class="secao-painel">
+      <div class="cartao">
+        <h2>Histórico de limpezas</h2>
+        <div class="filtros">
+          <div>
+            <label for="filtroCabanaHist">Cabana</label>
+            <select id="filtroCabanaHist"></select>
+          </div>
+          <div>
+            <label for="filtroDataInicioHist">De</label>
+            <input type="date" id="filtroDataInicioHist" />
+          </div>
+          <div>
+            <label for="filtroDataFimHist">Até</label>
+            <input type="date" id="filtroDataFimHist" />
+          </div>
+          <button class="botao botao-primario" id="botaoFiltrarHist">Filtrar</button>
+        </div>
+        <div id="listaHistorico"></div>
       </div>
     </section>
 

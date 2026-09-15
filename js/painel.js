@@ -55,6 +55,7 @@ async function iniciar() {
 
 function preencherFiltroCabanas() {
   const select = document.getElementById('filtroCabanaHist');
+  if (!select) return;
   select.innerHTML = '<option value="">Todas as cabanas</option>';
   cabanasDisponiveis.forEach(c => {
     const opt = document.createElement('option');
@@ -66,6 +67,7 @@ function preencherFiltroCabanas() {
 
 function preencherSelectProdutos() {
   const select = document.getElementById('compraProduto');
+  if (!select) return;
   select.innerHTML = '';
   produtosDisponiveis.forEach(p => {
     const opt = document.createElement('option');
@@ -164,6 +166,7 @@ async function marcarResolvido(item, botao) {
 }
 
 async function carregarComprar() {
+  if (!document.getElementById('listaComprar')) return;
   try {
     const resultado = await chamarApi('getComprar');
     if (!resultado || !resultado.ok) throw new Error();
@@ -174,6 +177,7 @@ async function carregarComprar() {
 }
 
 async function carregarEmBreve() {
+  if (!document.getElementById('listaEmbreve')) return;
   try {
     const resultado = await chamarApi('getEmBreve');
     if (!resultado || !resultado.ok) throw new Error();
@@ -187,6 +191,7 @@ async function carregarEmBreve() {
 
 async function carregarAvaliacao() {
   const div = document.getElementById('listaAvaliacao');
+  if (!div) return;
   try {
     const resultado = await chamarApi('getAvaliacaoHospede');
     if (!resultado || !resultado.ok) throw new Error();
@@ -216,6 +221,7 @@ async function carregarAvaliacao() {
 // ---- Histórico ----
 
 async function carregarHistorico() {
+  if (!document.getElementById('listaHistorico')) return;
   const cabana = document.getElementById('filtroCabanaHist').value;
   const dataInicio = document.getElementById('filtroDataInicioHist').value;
   const dataFim = document.getElementById('filtroDataFimHist').value;
@@ -262,12 +268,14 @@ async function carregarHistorico() {
   }
 }
 
-document.getElementById('botaoFiltrarHist').addEventListener('click', carregarHistorico);
+const botaoFiltrarHistEl = document.getElementById('botaoFiltrarHist');
+if (botaoFiltrarHistEl) botaoFiltrarHistEl.addEventListener('click', carregarHistorico);
 
 // ---- Compras ----
 
 function prepararFormularioCompra() {
   const campoData = document.getElementById('compraData');
+  if (!campoData) return;
   const hoje = new Date();
   campoData.value = hoje.toISOString().slice(0, 10);
 
@@ -316,6 +324,7 @@ async function enviarCompra() {
 
 async function carregarCompras() {
   const div = document.getElementById('listaCompras');
+  if (!div) return;
   try {
     const resultado = await chamarApi('getCompras');
     if (!resultado || !resultado.ok) throw new Error();
