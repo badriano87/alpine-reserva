@@ -105,7 +105,7 @@ function renderizarListaItens(divId, itens, mensagemVazia, permitirResolver, aoR
         acao.style.marginTop = '0.4rem';
         const botao = document.createElement('button');
         botao.className = 'botao-resolver';
-        botao.textContent = 'Já resolvi ✓';
+        botao.textContent = 'Dar baixa';
         botao.addEventListener('click', () => aoResolver(i, botao));
         acao.appendChild(botao);
         linha.appendChild(acao);
@@ -116,16 +116,24 @@ function renderizarListaItens(divId, itens, mensagemVazia, permitirResolver, aoR
   });
 }
 
+function esperar(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function marcarResolvido(item, botao) {
   botao.disabled = true;
   botao.textContent = 'Salvando...';
   try {
     const resultado = await chamarApi('resolverItem', { cabana: item.cabana, produto: item.produto });
     if (!resultado || !resultado.ok) throw new Error();
+    botao.classList.add('resolvido');
+    botao.textContent = 'Já resolvi ✓';
+    await esperar(900);
     await Promise.all([carregarComprar(), carregarEmBreve()]);
   } catch (err) {
     botao.disabled = false;
-    botao.textContent = 'Já resolvi ✓';
+    botao.classList.remove('resolvido');
+    botao.textContent = 'Dar baixa';
     alert('Não foi possível marcar como resolvido. Tente de novo.');
   }
 }

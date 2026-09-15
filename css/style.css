@@ -403,16 +403,22 @@ label {
   min-height: 36px;
   padding: 0.3rem 0.9rem;
   border-radius: 999px;
-  border: 1.5px solid var(--cor-ok);
-  background: var(--cor-ok-fundo);
-  color: var(--cor-ok);
+  border: 1.5px solid var(--cor-borda);
+  background: #f2efe9;
+  color: var(--cor-texto-suave);
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
 }
 
+.botao-resolver.resolvido {
+  border-color: var(--cor-ok);
+  background: var(--cor-ok-fundo);
+  color: var(--cor-ok);
+}
+
 .botao-resolver:disabled {
-  opacity: 0.6;
+  opacity: 0.8;
   cursor: not-allowed;
 }
 
