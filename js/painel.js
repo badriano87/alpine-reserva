@@ -2,6 +2,7 @@
 // avaliação do hóspede anterior e histórico de limpezas.
 
 let cabanasDisponiveis = [];
+let produtosDisponiveis = [];
 
 function escapeHtml(texto) {
   const div = document.createElement('div');
@@ -12,6 +13,16 @@ function escapeHtml(texto) {
 function formatarDataHora(isoString) {
   const d = new Date(isoString);
   return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatarData(isoString) {
+  const d = new Date(isoString);
+  return d.toLocaleDateString('pt-BR');
+}
+
+function formatarValor(valor) {
+  const numero = Number(valor) || 0;
+  return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function etiquetaStatus(status) {
@@ -25,13 +36,16 @@ async function iniciar() {
       throw new Error((produtosResp && produtosResp.erro) || 'Não foi possível carregar os dados.');
     }
     cabanasDisponiveis = produtosResp.cabanas;
+    produtosDisponiveis = produtosResp.produtos;
 
     preencherFiltroCabanas();
+    preencherSelectProdutos();
+    prepararFormularioCompra();
     document.getElementById('areaCarregando').style.display = 'none';
     document.getElementById('conteudoPainel').style.display = 'block';
 
     configurarAbas();
-    await Promise.all([carregarComprar(), carregarEmBreve(), carregarAvaliacao(), carregarHistorico()]);
+    await Promise.all([carregarComprar(), carregarEmBreve(), carregarAvaliacao(), carregarHistorico(), carregarCompras()]);
   } catch (err) {
     document.getElementById('areaCarregando').style.display = 'none';
     document.getElementById('areaErro').innerHTML =
@@ -46,6 +60,17 @@ function preencherFiltroCabanas() {
     const opt = document.createElement('option');
     opt.value = c.nome;
     opt.textContent = c.nome;
+    select.appendChild(opt);
+  });
+}
+
+function preencherSelectProdutos() {
+  const select = document.getElementById('compraProduto');
+  select.innerHTML = '';
+  produtosDisponiveis.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.nome;
+    opt.textContent = p.nome;
     select.appendChild(opt);
   });
 }
@@ -238,5 +263,85 @@ async function carregarHistorico() {
 }
 
 document.getElementById('botaoFiltrarHist').addEventListener('click', carregarHistorico);
+
+// ---- Compras ----
+
+function prepararFormularioCompra() {
+  const campoData = document.getElementById('compraData');
+  const hoje = new Date();
+  campoData.value = hoje.toISOString().slice(0, 10);
+
+  document.getElementById('formCompra').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    await enviarCompra();
+  });
+}
+
+async function enviarCompra() {
+  const botao = document.querySelector('#formCompra button[type="submit"]');
+  const mensagem = document.getElementById('mensagemCompra');
+  mensagem.innerHTML = '';
+
+  const dados = {
+    produto: document.getElementById('compraProduto').value,
+    quantidade: document.getElementById('compraQuantidade').value,
+    unidade: document.getElementById('compraUnidade').value,
+    valor: document.getElementById('compraValor').value,
+    dataCompra: document.getElementById('compraData').value,
+    loja: document.getElementById('compraLoja').value,
+    observacao: document.getElementById('compraObs').value
+  };
+
+  botao.disabled = true;
+  botao.textContent = 'Salvando...';
+  try {
+    const resultado = await chamarApi('registrarCompra', dados);
+    if (!resultado || !resultado.ok) throw new Error();
+
+    document.getElementById('compraQuantidade').value = '';
+    document.getElementById('compraUnidade').value = '';
+    document.getElementById('compraValor').value = '';
+    document.getElementById('compraLoja').value = '';
+    document.getElementById('compraObs').value = '';
+    mensagem.innerHTML = '<div class="mensagem-sucesso">Compra registrada! O item também foi dado como resolvido nas listas de alerta.</div>';
+
+    await Promise.all([carregarCompras(), carregarComprar(), carregarEmBreve()]);
+  } catch (err) {
+    mensagem.innerHTML = '<div class="erro">Não foi possível registrar a compra. Tente de novo.</div>';
+  } finally {
+    botao.disabled = false;
+    botao.textContent = 'Registrar compra';
+  }
+}
+
+async function carregarCompras() {
+  const div = document.getElementById('listaCompras');
+  try {
+    const resultado = await chamarApi('getCompras');
+    if (!resultado || !resultado.ok) throw new Error();
+    if (resultado.compras.length === 0) {
+      div.innerHTML = '<div class="vazio">Nenhuma compra registrada ainda.</div>';
+      return;
+    }
+    let html = '';
+    resultado.compras.forEach(c => {
+      html +=
+        '<div class="linha-tabela"><div>' +
+        '<strong>' + escapeHtml(c.produto) + '</strong><br>' +
+        '<span style="font-size:0.85rem; color:var(--cor-texto-suave);">' +
+        escapeHtml(c.quantidade) + ' ' + escapeHtml(c.unidade) +
+        (c.loja ? ' — ' + escapeHtml(c.loja) : '') +
+        '</span>' +
+        (c.observacao ? '<br><span style="color:var(--cor-texto-suave); font-size:0.85rem;">' + escapeHtml(c.observacao) + '</span>' : '') +
+        '</div><div style="text-align:right;">' +
+        '<strong>' + formatarValor(c.valor) + '</strong>' +
+        '<br><span style="font-size:0.75rem; color:var(--cor-texto-suave);">' + formatarData(c.dataCompra) + '</span>' +
+        '</div></div>';
+    });
+    div.innerHTML = html;
+  } catch (err) {
+    div.innerHTML = '<div class="erro">Erro ao carregar.</div>';
+  }
+}
 
 iniciar();

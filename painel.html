@@ -28,6 +28,7 @@
       <button class="aba-botao" data-aba="embreve">Em breve vai ser necessário</button>
       <button class="aba-botao" data-aba="avaliacao">Avaliação do hóspede</button>
       <button class="aba-botao" data-aba="historico">Histórico de limpezas</button>
+      <button class="aba-botao" data-aba="compras">Registrar compra</button>
     </div>
 
     <section id="secaoComprar" class="secao-painel ativa">
@@ -79,6 +80,57 @@
           <button class="botao botao-primario" id="botaoFiltrarHist">Filtrar</button>
         </div>
         <div id="listaHistorico"></div>
+      </div>
+    </section>
+
+    <section id="secaoCompras" class="secao-painel">
+      <div class="cartao">
+        <h2>Registrar compra</h2>
+        <p class="subtitulo" style="color:var(--cor-texto-suave);">
+          Estoque unificado, sem separar por cabana. Ao registrar, o produto some das
+          listas de alerta em todas as cabanas (igual ao botão "Dar baixa").
+        </p>
+        <form id="formCompra">
+          <div style="margin-bottom:0.9rem;">
+            <label for="compraProduto">Produto</label>
+            <select id="compraProduto" required></select>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.9rem;">
+            <div>
+              <label for="compraQuantidade">Quantidade</label>
+              <input type="number" id="compraQuantidade" min="0" step="0.01" required />
+            </div>
+            <div>
+              <label for="compraUnidade">Unidade</label>
+              <input type="text" id="compraUnidade" placeholder="litros, unidades, pacotes..." />
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.9rem;">
+            <div>
+              <label for="compraValor">Valor pago (R$)</label>
+              <input type="number" id="compraValor" min="0" step="0.01" />
+            </div>
+            <div>
+              <label for="compraData">Data da compra</label>
+              <input type="date" id="compraData" required />
+            </div>
+          </div>
+          <div style="margin-bottom:0.9rem;">
+            <label for="compraLoja">Onde comprou</label>
+            <input type="text" id="compraLoja" placeholder="Amazon, mercado local..." />
+          </div>
+          <div style="margin-bottom:0.9rem;">
+            <label for="compraObs">Observação (opcional)</label>
+            <input type="text" id="compraObs" />
+          </div>
+          <button type="submit" class="botao botao-primario">Registrar compra</button>
+          <div id="mensagemCompra"></div>
+        </form>
+      </div>
+
+      <div class="cartao">
+        <h2>Compras registradas</h2>
+        <div id="listaCompras"></div>
       </div>
     </section>
 

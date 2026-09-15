@@ -132,7 +132,9 @@ main {
 
 input[type="text"],
 input[type="password"],
-input[type="date"] {
+input[type="date"],
+input[type="number"],
+select {
   width: 100%;
   min-height: 48px;
   padding: 0.6rem 0.8rem;
@@ -488,6 +490,16 @@ label {
 
 .detalhe-sessao.aberto {
   display: block;
+}
+
+.mensagem-sucesso {
+  background: var(--cor-ok-fundo);
+  color: var(--cor-ok);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .linha-item-sessao {
