@@ -399,6 +399,23 @@ label {
   color: var(--cor-faltando);
 }
 
+.botao-resolver {
+  min-height: 36px;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--cor-ok);
+  background: var(--cor-ok-fundo);
+  color: var(--cor-ok);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-resolver:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .filtros {
   display: flex;
   flex-wrap: wrap;

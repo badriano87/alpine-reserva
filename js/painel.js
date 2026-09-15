@@ -67,7 +67,7 @@ function capitalizar(texto) {
 
 // ---- Listas genéricas de itens (comprar / em breve) ----
 
-function renderizarListaItens(divId, itens, mensagemVazia) {
+function renderizarListaItens(divId, itens, mensagemVazia, permitirResolver, aoResolver) {
   const div = document.getElementById(divId);
   if (itens.length === 0) {
     div.innerHTML = '<div class="vazio">' + mensagemVazia + '</div>';
@@ -80,29 +80,61 @@ function renderizarListaItens(divId, itens, mensagemVazia) {
     porCabana[i.cabana].push(i);
   });
 
-  let html = '';
+  div.innerHTML = '';
   Object.keys(porCabana).forEach(cabana => {
-    html += '<h3>' + escapeHtml(cabana) + '</h3>';
+    const titulo = document.createElement('h3');
+    titulo.textContent = cabana;
+    div.appendChild(titulo);
+
     porCabana[cabana].forEach(i => {
-      html +=
-        '<div class="linha-tabela"><div>' +
+      const linha = document.createElement('div');
+      linha.className = 'linha-tabela';
+      linha.innerHTML =
+        '<div>' +
         '<strong>' + escapeHtml(i.produto) + '</strong>' +
         (i.ambiente ? ' — ' + escapeHtml(i.ambiente) : '') +
         (i.observacao ? '<br><span style="color:var(--cor-texto-suave); font-size:0.85rem;">' + escapeHtml(i.observacao) + '</span>' : '') +
         '</div><div style="text-align:right;">' +
         etiquetaStatus(i.status) +
         '<br><span style="font-size:0.75rem; color:var(--cor-texto-suave);">' + formatarDataHora(i.dataHora) + '</span>' +
-        '</div></div>';
+        '</div>';
+
+      if (permitirResolver) {
+        const acao = document.createElement('div');
+        acao.style.textAlign = 'right';
+        acao.style.marginTop = '0.4rem';
+        const botao = document.createElement('button');
+        botao.className = 'botao-resolver';
+        botao.textContent = 'Já resolvi ✓';
+        botao.addEventListener('click', () => aoResolver(i, botao));
+        acao.appendChild(botao);
+        linha.appendChild(acao);
+      }
+
+      div.appendChild(linha);
     });
   });
-  div.innerHTML = html;
+}
+
+async function marcarResolvido(item, botao) {
+  botao.disabled = true;
+  botao.textContent = 'Salvando...';
+  try {
+    const resultado = await chamarApi('resolverItem', { cabana: item.cabana, produto: item.produto });
+    if (!resultado || !resultado.ok) throw new Error();
+    await Promise.all([carregarComprar(), carregarEmBreve()]);
+  } catch (err) {
+    botao.disabled = false;
+    botao.textContent = 'Já resolvi ✓';
+    alert('Não foi possível marcar como resolvido. Tente de novo.');
+  }
 }
 
 async function carregarComprar() {
   try {
     const resultado = await chamarApi('getComprar');
     if (!resultado || !resultado.ok) throw new Error();
-    renderizarListaItens('listaComprar', resultado.itens, 'Nada pendente de compra no momento. 🎉');
+    renderizarListaItens('listaComprar', resultado.itens, 'Nada pendente de compra no momento. 🎉', true, marcarResolvido);
   } catch (err) {
     document.getElementById('listaComprar').innerHTML = '<div class="erro">Erro ao carregar.</div>';
   }
@@ -112,7 +144,7 @@ async function carregarEmBreve() {
   try {
     const resultado = await chamarApi('getEmBreve');
     if (!resultado || !resultado.ok) throw new Error();
-    renderizarListaItens('listaEmbreve', resultado.itens, 'Nada precisando de atenção em breve.');
+    renderizarListaItens('listaEmbreve', resultado.itens, 'Nada precisando de atenção em breve.', true, marcarResolvido);
   } catch (err) {
     document.getElementById('listaEmbreve').innerHTML = '<div class="erro">Erro ao carregar.</div>';
   }
