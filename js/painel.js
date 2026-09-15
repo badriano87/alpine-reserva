@@ -25,6 +25,14 @@ function formatarValor(valor) {
   return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+function formatarQuantidade(numero) {
+  return Number(numero).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
+}
+
+function pluralizar(n, singular, plural) {
+  return n === 1 ? singular : plural;
+}
+
 function etiquetaStatus(status) {
   return '<span class="etiqueta-status nivel-' + nivelStatus(status) + '">' + escapeHtml(status) + '</span>';
 }
@@ -45,7 +53,7 @@ async function iniciar() {
     document.getElementById('conteudoPainel').style.display = 'block';
 
     configurarAbas();
-    await Promise.all([carregarComprar(), carregarEmBreve(), carregarAvaliacao(), carregarHistorico(), carregarCompras()]);
+    await Promise.all([carregarComprar(), carregarEmBreve(), carregarAvaliacao(), carregarHistorico(), carregarCompras(), carregarAnalises()]);
   } catch (err) {
     document.getElementById('areaCarregando').style.display = 'none';
     document.getElementById('areaErro').innerHTML =
@@ -313,7 +321,7 @@ async function enviarCompra() {
     document.getElementById('compraObs').value = '';
     mensagem.innerHTML = '<div class="mensagem-sucesso">Compra registrada! O item também foi dado como resolvido nas listas de alerta.</div>';
 
-    await Promise.all([carregarCompras(), carregarComprar(), carregarEmBreve()]);
+    await Promise.all([carregarCompras(), carregarComprar(), carregarEmBreve(), carregarAnalises()]);
   } catch (err) {
     mensagem.innerHTML = '<div class="erro">Não foi possível registrar a compra. Tente de novo.</div>';
   } finally {
@@ -346,6 +354,52 @@ async function carregarCompras() {
         '<strong>' + formatarValor(c.valor) + '</strong>' +
         '<br><span style="font-size:0.75rem; color:var(--cor-texto-suave);">' + formatarData(c.dataCompra) + '</span>' +
         '</div></div>';
+    });
+    div.innerHTML = html;
+  } catch (err) {
+    div.innerHTML = '<div class="erro">Erro ao carregar.</div>';
+  }
+}
+
+// ---- Análises ----
+
+async function carregarAnalises() {
+  const div = document.getElementById('listaAnalises');
+  if (!div) return;
+  try {
+    const resultado = await chamarApi('getAnalises');
+    if (!resultado || !resultado.ok) throw new Error();
+    if (resultado.analises.length === 0) {
+      div.innerHTML = '<div class="vazio">Ainda sem dados suficientes. Registre compras na aba "Registrar compra" para começar a calcular as médias.</div>';
+      return;
+    }
+    let html = '';
+    resultado.analises.forEach(a => {
+      const temMedia = a.mediaPorLimpeza !== null;
+      html += '<div class="linha-tabela"><div>';
+      html += '<strong>' + escapeHtml(a.produto) + '</strong><br>';
+      if (temMedia) {
+        html +=
+          '<span style="color:var(--cor-texto-suave); font-size:0.85rem;">' +
+          'baseado em ' + a.ciclos + ' ' + pluralizar(a.ciclos, 'reposição', 'reposições') +
+          ' e ' + a.totalLimpezas + ' ' + pluralizar(a.totalLimpezas, 'limpeza', 'limpezas') +
+          '</span>';
+        if (a.mediaCustoPorLimpeza) {
+          html += '<br><span style="color:var(--cor-texto-suave); font-size:0.85rem;">custo médio: ' +
+            formatarValor(a.mediaCustoPorLimpeza) + ' por limpeza</span>';
+        }
+      } else {
+        html += '<span style="color:var(--cor-texto-suave); font-size:0.85rem;">ainda sem média — aguardando ficar "Em falta" de novo</span>';
+      }
+      if (a.temCicloAberto) {
+        html += '<br><span style="color:var(--cor-texto-suave); font-size:0.8rem;">' +
+          formatarQuantidade(a.quantidadeEmAberto) + ' ' + escapeHtml(a.unidade) + ' em uso agora, ainda não entra na média</span>';
+      }
+      html += '</div><div style="text-align:right;">';
+      html += temMedia
+        ? '<strong>' + formatarQuantidade(a.mediaPorLimpeza) + ' ' + escapeHtml(a.unidade) + '</strong><br><span style="font-size:0.75rem; color:var(--cor-texto-suave);">por limpeza</span>'
+        : '<span class="etiqueta-status nivel-bom">Coletando dados</span>';
+      html += '</div></div>';
     });
     div.innerHTML = html;
   } catch (err) {

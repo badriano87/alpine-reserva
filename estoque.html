@@ -28,6 +28,7 @@
       <button class="aba-botao" data-aba="embreve">Em breve vai ser necessário</button>
       <button class="aba-botao" data-aba="compras">Registrar compra</button>
       <button class="aba-botao" data-aba="historico">Histórico de limpezas</button>
+      <button class="aba-botao" data-aba="analises">Análises</button>
     </div>
 
     <section id="secaoComprar" class="secao-painel ativa">
@@ -120,6 +121,19 @@
           <button class="botao botao-primario" id="botaoFiltrarHist">Filtrar</button>
         </div>
         <div id="listaHistorico"></div>
+      </div>
+    </section>
+
+    <section id="secaoAnalises" class="secao-painel">
+      <div class="cartao">
+        <h2>Análises</h2>
+        <p class="subtitulo" style="color:var(--cor-texto-suave);">
+          Para cada produto, dividimos o quanto você repôs desde a última vez que ele
+          ficou em falta pelo número de limpezas que aconteceram nesse intervalo
+          (nas duas cabanas). Precisa de pelo menos uma compra registrada e um "Em
+          falta" depois dela para calcular.
+        </p>
+        <div id="listaAnalises"></div>
       </div>
     </section>
 
